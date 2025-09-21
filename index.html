@@ -6,36 +6,33 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>Testsite — Dimensio</title>
+  <title>Testsite — Bamboo Disposables</title>
 
-  <!-- n8n chat widget styles (default thema/kleuren) -->
+  <!-- n8n chat widget styles -->
   <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
 
   <style>
-    /* Full-screen achtergrondafbeelding */
+    /* Full-screen background image */
     html, body { height: 100%; margin: 0; }
-    body { background: #000; }
-    .full { position: fixed; inset: 0; overflow: hidden; }
-    .full > img {
-      width: 100%; height: 100%;
-      object-fit: cover; object-position: center;
-      display: block; user-select: none; -webkit-user-drag: none;
+    body {
+      background: #000 center / cover no-repeat fixed;
+      background-image: url("./Assets/BackgroundImage.png"); /* <-- correct path */
     }
 
-    /* Widget-afmetingen + themavariabelen die n8n officieel ondersteunt */
+    /* Widget size + theme vars n8n supports */
     :root {
       --chat--window--width: 420px;
       --chat--window--height: 600px;
 
-      /* Header kleur */
+      /* Header color */
       --chat--header--background: #987E60;
 
-      /* Header typografie kleiner om hoogte te beperken */
-      --chat--heading--font-size: 1.8rem;   /* titel */
-      --chat--subtitle--font-size: 1.2rem;   /* subtitel */
+      /* Compact header typography */
+      --chat--heading--font-size: 1.8rem;  /* title */
+      --chat--subtitle--font-size: 1.2rem; /* subtitle */
     }
 
-    /* Extra compacte header (defensieve selectors voor diverse buildvarianten) */
+    /* Extra compact header */
     .n8n-chat-header,
     [class*="chat-header" i] {
       padding-top: 10px !important;
@@ -53,7 +50,7 @@
       line-height: 1.2 !important;
     }
 
-    /* Overlay om muis-events te vangen tijdens resize */
+    /* Overlay to capture mouse events during resize */
     .dim-resize-capture {
       position: fixed;
       inset: 0;
@@ -63,7 +60,7 @@
     }
     .dim-resize-capture.is-active { display: block; }
 
-    /* Resize-handles (links/boven/hoek links-boven met subtiele grip) */
+    /* Resize handles */
     .dim-handle {
       position: absolute;
       z-index: 2147483647;
@@ -92,24 +89,20 @@
     .dim-handle-nw:hover::after { opacity: .9; }
     .dim-handle:focus-visible { outline: 2px dashed rgba(255,255,255,.35); outline-offset: 2px; }
 
-    /* Mobiel: wat ruimte onderaan zodat launcher niet over UI heen valt */
+    /* Mobile spacing so the launcher doesn’t overlap */
     @media (max-width: 480px) {
       body { padding-bottom: 72px; }
     }
   </style>
 </head>
 <body>
-  <div class="full">
-    <img src="BackgroundImage.png" alt="Dimensio" />
-  </div>
-
-  <!-- Mountpunt voor de widget -->
+  <!-- Widget mount point -->
   <div id="n8n-chat"></div>
 
-  <!-- Overlay die muis-events opvangt tijdens resizen -->
+  <!-- Overlay that captures mouse events during resize -->
   <div class="dim-resize-capture" id="dim-resize-capture"></div>
 
   <!-- Chat init -->
-  <script type="module" src="chat.js?v=1"></script>
+  <script type="module" src="./chat.js?v=2"></script>
 </body>
 </html>

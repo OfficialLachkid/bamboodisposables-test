@@ -1,37 +1,49 @@
 import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
 
 /* ----------------------------
- * Kopteksten (kleuren blijven verder default)
+ * Headings
  * ---------------------------- */
 const TITLE = 'Welkom bij Bamboo Disposables👋';
-// const SUBTITLE = 'Stel je vraag, we helpen je graag!';
-// const WATERMARK_URL = 'Assets/plastic_molecules1.png'; // transparante PNG
+const SUBTITLE = 'Stel je vraag, we helpen je graag!';
+
+/* Optional watermark behind messages (leave empty to disable) */
+const WATERMARK_URL = ''; // e.g. './Assets/watermark.png'
+
+/* Your n8n Chat Trigger webhook */
+const WEBHOOK_URL = 'https://n8n1.vbservices.org/webhook/e60ab9b2-0a77-4f7c-80d7-cf6c9534fbb9/chat';
 
 /* ----------------------------
  * n8n widget init
  * ---------------------------- */
-createChat({
-  webhookUrl: 'https://n8n1.vbservices.org/webhook/e60ab9b2-0a77-4f7c-80d7-cf6c9534fbb9/chat',
-  mode: 'window',
-  target: '#n8n-chat',
-  loadPreviousSession: true,
-  showWelcomeScreen: false,
-  defaultLanguage: 'en', // verplicht "en"; teksten kunnen NL
-  initialMessages: ['Hoi! Waar kan ik je mee helpen?'],
-  i18n: {
-    en: {
-      title: TITLE,
-      subtitle: SUBTITLE,
-      inputPlaceholder: 'Typ hier je bericht…',
-      getStarted: 'Nieuw gesprek',
-      footer: '',
+try {
+  createChat({
+    webhookUrl: WEBHOOK_URL,
+    mode: 'window',
+    target: '#n8n-chat',
+    loadPreviousSession: true,
+    showWelcomeScreen: false,
+    defaultLanguage: 'en',
+    initialMessages: ['Hoi! Waar kan ik je mee helpen?'],
+    i18n: {
+      en: {
+        title: TITLE,
+        subtitle: SUBTITLE,
+        inputPlaceholder: 'Typ hier je bericht…',
+        getStarted: 'Nieuw gesprek',
+        footer: '',
+      },
     },
-  },
-  enableStreaming: false,
-});
+    enableStreaming: false,
+  });
+} catch (err) {
+  console.error('Failed to initialize n8n chat widget:', err);
+  console.warn(
+    'If you see a CORS error, add your origin (e.g. http://127.0.0.1:5501 and http://localhost:5501) to the Chat Trigger node’s "Allowed Origins", or configure CORS on your reverse proxy.'
+  );
+}
 
 /* ----------------------------
- * Watermark in chat body (achter de berichten)
+ * Watermark in chat body
  * ---------------------------- */
 const WINDOW_SELECTORS = [
   '.n8n-chat-window',
@@ -65,22 +77,25 @@ function findChatBody(winEl) {
 }
 
 function applyWatermark() {
+  // Only apply if a URL is set
+  const url = (typeof WATERMARK_URL === 'string' && WATERMARK_URL.trim()) ? WATERMARK_URL : null;
+  if (!url) return false;
+
   const win = findChatWindow();
   const body = findChatBody(win);
   if (!body) return false;
 
-  body.style.backgroundImage = `url("${WATERMARK_URL}")`;
+  body.style.backgroundImage = `url("${url}")`;
   body.style.backgroundRepeat = 'no-repeat';
-  body.style.backgroundPosition = 'center 64px';   // net onder compactere header
+  body.style.backgroundPosition = 'center 64px';   // just below compact header
   body.style.backgroundSize = 'min(70%, 520px)';
   body.style.backgroundAttachment = 'local';
   body.style.backgroundBlendMode = 'normal';
-
   return true;
 }
 
 /* ----------------------------
- * Resizable: links (W), boven (N), en hoek links-boven (NW)
+ * Resizable: W, N, NW
  * ---------------------------- */
 const MIN_W = 320;
 const MIN_H = 420;
@@ -128,11 +143,11 @@ function injectHandles(winEl) {
 
     function onMove(e) {
       let w = startW, h = startH;
-      const dx = e.clientX - startX;  // + naar rechts
-      const dy = e.clientY - startY;  // + naar beneden
+      const dx = e.clientX - startX;  // + right
+      const dy = e.clientY - startY;  // + down
 
-      if (mode.includes('w')) { w = clamp(startW - dx, MIN_W, maxW()); } // links slepen
-      if (mode.includes('n')) { h = clamp(startH - dy, MIN_H, maxH()); } // boven slepen
+      if (mode.includes('w')) { w = clamp(startW - dx, MIN_W, maxW()); } // drag left edge
+      if (mode.includes('n')) { h = clamp(startH - dy, MIN_H, maxH()); } // drag top edge
 
       setVarPx('--chat--window--width',  w);
       setVarPx('--chat--window--height', h);
@@ -177,7 +192,7 @@ function injectHandles(winEl) {
   hNW.addEventListener('keydown', (e) => keyResize('wn', e));
 }
 
-/* handles + watermark injecteren zodra de widget er is */
+/* Add handles + (optional) watermark once the widget exists */
 function ensureEnhancements() {
   const win = findChatWindow();
   if (!win) return false;
@@ -190,11 +205,21 @@ if (!ensureEnhancements()) {
   mo.observe(document.documentElement, { childList: true, subtree: true });
 }
 
-/* Houd maten binnen viewport bij resize van het venster en update watermark */
+/* Keep sizes in viewport on window resize + refresh watermark */
 window.addEventListener('resize', () => {
   const w = getVarPx('--chat--window--width',  420);
   const h = getVarPx('--chat--window--height', 600);
   setVarPx('--chat--window--width',  clamp(w, MIN_W, maxW()));
   setVarPx('--chat--window--height', clamp(h, MIN_H, maxH()));
   applyWatermark();
+});
+
+/* Helpful console hint if the webhook fails due to CORS */
+window.addEventListener('unhandledrejection', (ev) => {
+  const msg = String(ev?.reason || '');
+  if (msg.includes('Failed to fetch')) {
+    console.warn(
+      'The n8n webhook request failed. If this is a CORS error, set Allowed Origins on the Chat Trigger to include your dev origin(s): http://127.0.0.1:5501 and http://localhost:5501'
+    );
+  }
 });
