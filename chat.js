@@ -7,7 +7,7 @@ const TITLE = 'Welkom bij Bamboo Disposables👋';
 const SUBTITLE = 'Stel je vraag, we helpen je graag!';
 
 /* Optional watermark behind messages (leave empty to disable) */
-const WATERMARK_URL = ''; // e.g. './Assets/watermark.png'
+const WATERMARK_URL = './Assets/BambooImage.png'; // e.g. './Assets/watermark.png'
 
 /* Your n8n Chat Trigger webhook */
 const WEBHOOK_URL = 'https://n8n1.vbservices.org/webhook/e60ab9b2-0a77-4f7c-80d7-cf6c9534fbb9/chat';
