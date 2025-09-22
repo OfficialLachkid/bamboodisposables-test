@@ -87,10 +87,20 @@ function applyWatermark() {
 
   body.style.backgroundImage = `url("${url}")`;
   body.style.backgroundRepeat = 'no-repeat';
-  body.style.backgroundPosition = 'center 64px';   // just below compact header
-  body.style.backgroundSize = 'min(70%, 520px)';
+
+  // Center perfectly in the chat body
+  body.style.backgroundPosition = 'center center';
+
+  // Keep the whole image visible (no cropping)
+  body.style.backgroundSize = 'contain';
+
+  // Make it scroll with the messages (feel free to change to 'fixed' if you prefer)
   body.style.backgroundAttachment = 'local';
-  body.style.backgroundBlendMode = 'normal';
+
+  // If the body has padding, keep the image inside the padded area
+  body.style.backgroundOrigin = 'content-box';
+  body.style.backgroundClip = 'content-box';
+
   return true;
 }
 
